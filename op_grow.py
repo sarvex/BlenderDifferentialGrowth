@@ -71,9 +71,8 @@ def grow_step(
         vert.co += offset * scale
 
         # Readjust weights
-        if settings.inhibit_base > 0:
-            if not vert.is_boundary:
-                w = w ** (1 + settings.inhibit_base) - 0.01;
+        if settings.inhibit_base > 0 and not vert.is_boundary:
+            w = w ** (1 + settings.inhibit_base) - 0.01;
         if settings.inhibit_shell > 0:
             sh = vert.calc_shell_factor()
             w = w * pow(sh, -1 * settings.inhibit_shell)
@@ -89,7 +88,7 @@ def grow_step(
         if (l / settings.split_radius) > (1 / avg_weight):
             edges_to_subdivide.append(edge)
 
-    if len(edges_to_subdivide) > 0:
+    if edges_to_subdivide:
         print("Subdividing %i" % len(edges_to_subdivide))
         bmesh.ops.subdivide_edges(
             bm,
@@ -141,7 +140,7 @@ def calc_vert_attraction(vert):
     result = Vector()
     for edge in vert.link_edges:
         other = edge.other_vert(vert)
-        if other == None:
+        if other is None:
             continue
         result += other.co - vert.co
     return result
